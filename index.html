@@ -112,6 +112,36 @@
             </main>
         </div>
     </div>
-    <script src="app.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAab2hNwk-TlXOUOGWrVPAgCqUmxjG6nY",
+            authDomain: "timebox-planner-8fe89.firebaseapp.com",
+            projectId: "timebox-planner-8fe89",
+            storageBucket: "timebox-planner-8fe89.firebasestorage.app",
+            messagingSenderId: "1090078372752",
+            appId: "1:1090078372752:web:129fa26e8c365fd998f915",
+            measurementId: "G-3KZT5GGMJ1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Expose Firebase DB to global scope for app.js to use
+        window.firebaseDB = db;
+        // Also expose necessary Firestore functions
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.onSnapshot = onSnapshot;
+
+        // Custom event to signal that Firebase is ready
+        window.dispatchEvent(new Event('firebaseReady'));
+    </script>
+    <script src="app.js" type="module"></script>
 </body>
 </html>

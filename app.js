@@ -104,8 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ----------------------------------------------------
-    // 2. Data Persistence (Save & Load logic)
+    // 2. Data Persistence (Save & Load logic with Firebase)
     // ----------------------------------------------------
+    let unsubscribeSnapshot = null; // Store the unsubscribe function to clean up listeners
+
     const gatherSaveData = () => {
         const data = {};
         // Textareas (Priorities, BD Text, Timebox)
@@ -119,18 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return data;
     };
 
-    const saveDataForDate = () => {
+    const saveDataForDate = async () => {
+        if (!window.firebaseDB) return; // DB not ready yet
         const data = gatherSaveData();
-        localStorage.setItem(`planner_${currentDateKey}`, JSON.stringify(data));
+        
+        try {
+            await window.setDoc(window.doc(window.firebaseDB, "planners", currentDateKey), data);
+            // Optionally add a subtle indicator that saving was successful
+        } catch (e) {
+            console.error("Error saving document: ", e);
+        }
     };
 
-    const loadDataForCurrentDate = () => {
-        const savedStr = localStorage.getItem(`planner_${currentDateKey}`);
-        let data = {};
-        if (savedStr) {
-            try { data = JSON.parse(savedStr); } catch (e) {}
-        }
-        
+    const applyDataToUI = (data) => {
         // Restore all textareas
         document.querySelectorAll('textarea').forEach(el => {
             if (el.dataset.key) {
@@ -149,15 +152,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.checked = !!data[el.dataset.key];
             }
         });
+    }
+
+    const loadDataForCurrentDate = () => {
+        if (!window.firebaseDB) {
+            // Wait for firebase to be ready if it's not yet
+            window.addEventListener('firebaseReady', loadDataForCurrentDate, {once: true});
+            return;
+        }
+
+        // Clean up previous listener if it exists
+        if (unsubscribeSnapshot) {
+            unsubscribeSnapshot();
+        }
+
+        // Listen for real-time updates for the current date
+        unsubscribeSnapshot = window.onSnapshot(
+            window.doc(window.firebaseDB, "planners", currentDateKey), 
+            (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    applyDataToUI(docSnapshot.data());
+                } else {
+                    // Document doesn't exist (new day), clear UI
+                    applyDataToUI({});
+                }
+            },
+            (error) => {
+                console.error("Error listening to document: ", error); // Handle permissions or connectivity error
+            }
+        );
     };
 
     // Setup generic input listeners for saving
     const setupSaveListeners = () => {
+        // Debounce function to prevent too many writes to Firestore
+        let saveTimeout;
+        const debouncedSave = () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveDataForDate, 500); // Wait 500ms after last keystroke to save
+        };
+
         document.querySelectorAll('textarea').forEach(el => {
-            el.addEventListener('input', saveDataForDate);
+            el.addEventListener('input', debouncedSave);
         });
         document.querySelectorAll('.bd-checkbox').forEach(el => {
-            el.addEventListener('change', saveDataForDate);
+            el.addEventListener('change', saveDataForDate); // Save immediately on checkbox toggle
         });
     };
 
