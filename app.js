@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = gatherSaveData();
         
         try {
-            await window.setDoc(window.doc(window.firebaseDB, "planners", currentDateKey), data);
+            await window.firebaseDB.collection("planners").doc(currentDateKey).set(data);
             // Optionally add a subtle indicator that saving was successful
         } catch (e) {
             console.error("Error saving document: ", e);
@@ -167,20 +167,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Listen for real-time updates for the current date
-        unsubscribeSnapshot = window.onSnapshot(
-            window.doc(window.firebaseDB, "planners", currentDateKey), 
-            (docSnapshot) => {
-                if (docSnapshot.exists()) {
+        unsubscribeSnapshot = window.firebaseDB.collection("planners").doc(currentDateKey)
+            .onSnapshot((docSnapshot) => {
+                if (docSnapshot.exists) {
                     applyDataToUI(docSnapshot.data());
                 } else {
                     // Document doesn't exist (new day), clear UI
                     applyDataToUI({});
                 }
-            },
-            (error) => {
+            }, (error) => {
                 console.error("Error listening to document: ", error); // Handle permissions or connectivity error
-            }
-        );
+            });
     };
 
     // Setup generic input listeners for saving

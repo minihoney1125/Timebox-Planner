@@ -113,11 +113,11 @@
         </div>
     </div>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    <!-- Firebase SDKs (compat version to support local file:// access) -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
 
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCAab2hNwk-TlXOUOGWrVPAgCqUmxjG6nY",
             authDomain: "timebox-planner-8fe89.firebaseapp.com",
@@ -129,19 +129,12 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Expose Firebase DB to global scope for app.js to use
-        window.firebaseDB = db;
-        // Also expose necessary Firestore functions
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.onSnapshot = onSnapshot;
-
-        // Custom event to signal that Firebase is ready
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        window.firebaseDB = firebase.firestore();
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
-    <script src="app.js" type="module"></script>
+    <script src="app.js"></script>
 </body>
 </html>
