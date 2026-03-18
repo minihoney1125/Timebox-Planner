@@ -110,11 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gatherSaveData = () => {
         const data = {};
-        // Textareas (Priorities, BD Text, Timebox)
+        // Textareas (Priorities, BD Text, Timebox, Keypoint)
         document.querySelectorAll('textarea').forEach(el => {
             if (el.dataset.key) data[el.dataset.key] = el.value;
         });
-        // Checkboxes (BD Check)
+        // Checkboxes (BD Check + Keypoint Check)
         document.querySelectorAll('.bd-checkbox').forEach(el => {
             if (el.dataset.key) data[el.dataset.key] = el.checked;
         });
@@ -195,6 +195,55 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.bd-checkbox').forEach(el => {
             el.addEventListener('change', saveDataForDate); // Save immediately on checkbox toggle
         });
+    };
+
+    // ----------------------------------------------------
+    // 전일복사: Copy previous day's data into current date
+    // ----------------------------------------------------
+    const copyPreviousDay = async () => {
+        if (!window.firebaseDB) return;
+
+        const btn = document.getElementById('copy-prev-day-btn');
+        
+        // Calculate previous day
+        const prevDate = new Date(currentDate.getTime());
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevDateKey = getFormattedDateString(prevDate);
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 불러오는 중...';
+
+            const docSnap = await window.firebaseDB.collection('planners').doc(prevDateKey).get();
+            if (!docSnap.exists) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-copy"></i> 전일복사';
+                alert(`전일(${prevDateKey}) 데이터가 없습니다.`);
+                return;
+            }
+            
+            const prevData = docSnap.data();
+            
+            // Apply previous day data to UI
+            applyDataToUI(prevData);
+            
+            // Save to current date in Firebase
+            await window.firebaseDB.collection('planners').doc(currentDateKey).set(prevData);
+            
+            // Success feedback
+            btn.disabled = false;
+            btn.classList.add('success');
+            btn.innerHTML = '<i class="fas fa-check"></i> 복사 완료!';
+            setTimeout(() => {
+                btn.classList.remove('success');
+                btn.innerHTML = '<i class="fas fa-copy"></i> 전일복사';
+            }, 2500);
+        } catch (e) {
+            console.error('전일복사 오류:', e);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-copy"></i> 전일복사';
+            alert('복사 중 오류가 발생했습니다.');
+        }
     };
 
     // ----------------------------------------------------
@@ -292,6 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendar();
         updateHeaderDateUI();
         loadDataForCurrentDate();
+
+        // 전일복사 button
+        document.getElementById('copy-prev-day-btn').addEventListener('click', copyPreviousDay);
     };
 
     initApp();

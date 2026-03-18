@@ -545,6 +545,140 @@ textarea.auto-expand:focus {
     box-shadow: inset 0 0 0 2px var(--focus-ring);
 }
 
+/* TODAY KEYPOINT SECTION */
+.keypoint-section {
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, hsl(200, 30%, 98%), hsl(200, 20%, 95%));
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.keypoint-header {
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-color));
+    color: var(--white);
+    padding: 0.6rem 1rem;
+    border-radius: calc(var(--radius-md) - 2px) calc(var(--radius-md) - 2px) 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.keypoint-header i {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.keypoint-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.keypoint-list {
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.keypoint-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.keypoint-item:focus-within {
+    background-color: hsl(200, 30%, 97%);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.keypoint-input {
+    flex: 1;
+    border: none;
+    border-bottom: 1.5px solid var(--border-color);
+    padding: 0.1rem 0;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-main);
+    outline: none;
+    background: transparent;
+    resize: none;
+    overflow: hidden;
+    min-height: 24px;
+    transition: border-color 0.2s;
+    font-weight: 500;
+}
+
+.keypoint-input:focus {
+    border-bottom-color: var(--primary-color);
+}
+
+/* CALENDAR COPY BUTTON */
+.calendar-copy-area {
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+}
+
+.copy-prev-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--primary-color);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.copy-prev-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.copy-prev-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.copy-prev-btn.success {
+    border-color: #4caf50;
+    color: #4caf50;
+    animation: successPulse 0.5s ease;
+}
+
+.copy-prev-btn:disabled {
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .app-container {
